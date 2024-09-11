@@ -35,9 +35,20 @@ public class SeedDatabase {
                 .desiredWeeklyFrequency(1)
                 .build();
 
-        goalsRepository.saveAll(List.of(goal1, goal2, goal3));
+        Goals goal4 = Goals.builder()
+                .title("Teste Meta Futura")
+                .desiredWeeklyFrequency(2)
+                .build();
 
-        System.out.println(goal1);
+        Goals goal5 = Goals.builder()
+                .title("Teste Meta Semana Passa")
+                .desiredWeeklyFrequency(4)
+                .build();
+
+        goalsRepository.saveAll(List.of(goal1, goal2, goal3, goal4, goal5));
+        goal4.setCreatedAt(OffsetDateTime.now().plusDays(20));
+        goal5.setCreatedAt(OffsetDateTime.now().minusDays(8));
+        goalsRepository.saveAll(List.of(goal4, goal5));
 
         GoalCompletions goalCompletions1 = GoalCompletions.builder()
                 .goals(goal1)

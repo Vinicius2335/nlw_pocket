@@ -1,4 +1,4 @@
-package com.github.vinicius2335.back.modules.goals;
+package com.github.vinicius2335.back.modules.goals.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

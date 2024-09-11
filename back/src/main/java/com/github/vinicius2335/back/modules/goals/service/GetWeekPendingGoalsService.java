@@ -1,10 +1,17 @@
 package com.github.vinicius2335.back.modules.goals.service;
 
 import com.github.vinicius2335.back.modules.goals.GoalsRepository;
+import com.github.vinicius2335.back.modules.goals.dto.response.GoalsSummary;
+import com.github.vinicius2335.back.modules.goals.dto.response.GoalsSummaryListResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Calendar;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.List;
+
+import static java.time.temporal.TemporalAdjusters.nextOrSame;
+import static java.time.temporal.TemporalAdjusters.previousOrSame;
 
 @RequiredArgsConstructor
 @Service
@@ -13,13 +20,17 @@ public class GetWeekPendingGoalsService {
 
     // novas metas não devem influenciar nas metas passadas
     // contar as metas realizadas durante a semana e verificar se foi completada ou não
-    public void execute(){
-        Calendar now = Calendar.getInstance();
+    public GoalsSummaryListResponse execute(){
+        LocalDate now = LocalDate.now();
 
-        int currentYear = now.get(Calendar.YEAR);
-        int currentWeek = now.get(Calendar.WEEK_OF_YEAR);
+        LocalDate firstDayOfWeek = now.with(previousOrSame(DayOfWeek.SUNDAY));
+        LocalDate lastDayOfWeek = now.with(nextOrSame(DayOfWeek.SATURDAY));
 
-        // quais sao todas as metas criadas até a semana atual
-        // goalsCreatedUpToWeek =
+        List<GoalsSummary> goalsSummaries = goalsRepository.pendingGoals(
+                firstDayOfWeek.getDayOfMonth(),
+                lastDayOfWeek.getDayOfMonth()
+        );
+
+        return new GoalsSummaryListResponse(goalsSummaries);
     }
 }

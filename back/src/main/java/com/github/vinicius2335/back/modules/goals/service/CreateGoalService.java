@@ -1,6 +1,6 @@
 package com.github.vinicius2335.back.modules.goals.service;
 
-import com.github.vinicius2335.back.modules.goals.CreateGoalRequest;
+import com.github.vinicius2335.back.modules.goals.dto.request.CreateGoalRequest;
 import com.github.vinicius2335.back.modules.goals.Goals;
 import com.github.vinicius2335.back.modules.goals.GoalsRepository;
 import jakarta.transaction.Transactional;

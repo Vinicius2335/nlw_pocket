@@ -1,5 +1,6 @@
 package com.github.vinicius2335.back.modules.goals;
 
+import com.github.vinicius2335.back.modules.goals.dto.request.CreateGoalRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
