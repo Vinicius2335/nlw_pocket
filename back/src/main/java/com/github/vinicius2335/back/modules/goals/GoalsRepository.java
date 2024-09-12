@@ -2,6 +2,7 @@ package com.github.vinicius2335.back.modules.goals;
 
 import com.github.vinicius2335.back.modules.goals.completions.dto.response.GoalCompletionsSummary;
 import com.github.vinicius2335.back.modules.goals.dto.response.GoalsSummary;
+import com.github.vinicius2335.back.modules.goals.dto.response.WeekSummary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -67,5 +68,45 @@ public interface GoalsRepository extends JpaRepository<Goals, UUID> {
             @Param("firstDayOfWeek") int firstDayOfWeek,
             @Param("lastDayOfWeek") int lastDayOfWeek,
             @Param("goalId") UUID goalId
+    );
+
+    @Query(
+            value = """
+                     WITH goals_created_up_to_week AS (
+                         SELECT *
+                         FROM goals
+                         WHERE EXTRACT(DAY FROM goals.created_at) <= :lastDayOfWeek
+                     ), goals_completed_in_week AS (
+                         SELECT
+                             gc.id AS id,
+                             goals.title AS title,
+                             gc.created_at AS completedAt,
+                             DATE(gc.created_at) AS completedAtDate
+                         FROM goal_completions AS gc
+                         INNER JOIN goals ON gc.goal_id = goals.id
+                         WHERE (
+                            EXTRACT(DAY FROM gc.created_at) >= :firstDayOfWeek AND
+                            EXTRACT(DAY FROM gc.created_at) <= :lastDayOfWeek
+                         )
+                    ), goals_completed_by_week_day AS (
+                        SELECT
+                            goals_completed_in_week.completedAtDate AS completedAtDate,
+                            JSON_AGG(
+                                JSON_BUILD_OBJECT(
+                                    'id', goals_completed_in_week.id,
+                                    'title', goals_completed_in_week.title,
+                                    'completedAt', goals_completed_in_week.completedAt
+                                )
+                            ) AS completions
+                        FROM goals_completed_in_week
+                        GROUP BY goals_completed_in_week.completedAtDate
+                    ) SELECT *
+                    FROM goals_completed_by_week_day
+                    """,
+            nativeQuery = true
+    )
+    List<WeekSummary> goalsCompletedByWeekDay(
+            @Param("firstDayOfWeek") int firstDayOfWeek,
+            @Param("lastDayOfWeek") int lastDayOfWeek
     );
 }

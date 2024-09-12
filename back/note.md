@@ -30,3 +30,22 @@ goals_completion_counts AS (
 ````
 
 Para que o WITH funcione precisamos charmar eles
+
+## 1 CAMPO POSSUI UM ARRAY EM JSON VINDO DO BANCO -> UM ARRAY DE UMA CLASSE JAVA
+
+- OBS: essa foi dificil, no final quem salvou foi o chatGPT.
+- Ex: dentro de GetWeekSummaryService  
+
+````java
+
+// addModule para evitar erro de nao reconhecer o OffSetDateTime 
+ObjectMapper objectMapper = JsonMapper.builder()
+                            .addModule(new JavaTimeModule())
+                            .build();
+
+// para extrair os objetos dentro da string que representa um array de objetos json
+JsonNode jsonNode = objectMapper.readTree(weekSummary.getCompletions());
+
+// converte um String que representa um objeto json para uma classe java
+Completion completionConvertedFromJson = objectMapper.readValue(json, Completion.class);
+````
