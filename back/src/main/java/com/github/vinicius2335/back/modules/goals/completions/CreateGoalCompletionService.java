@@ -5,6 +5,7 @@ import com.github.vinicius2335.back.modules.goals.Goals;
 import com.github.vinicius2335.back.modules.goals.GoalsRepository;
 import com.github.vinicius2335.back.modules.goals.completions.dto.request.CreateGoalCompletionRequest;
 import com.github.vinicius2335.back.modules.goals.completions.dto.response.GoalCompletionsSummary;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,13 @@ public class CreateGoalCompletionService {
     private final GoalCompletionsRepository goalCompletionsRepository;
     private final GoalsRepository goalsRepository;
 
+    /**
+     * Finaliza a meta do dia
+     * @param request apresenta o identificador da meta a ser batida
+     * @throws GoalNotFoundException se a meta nao for encontrada pelo identificador
+     * @throws GoalAlreadyCompletedException se a meta ja foi concluida
+     */
+    @Transactional
     public void execute(
             CreateGoalCompletionRequest request
     ) throws GoalNotFoundException, GoalAlreadyCompletedException {

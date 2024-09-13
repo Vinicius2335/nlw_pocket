@@ -43,9 +43,15 @@ ObjectMapper objectMapper = JsonMapper.builder()
                             .addModule(new JavaTimeModule())
                             .build();
 
+// OBS: Logica para o json [{"id": 1, "title": "exemplo"}] que vem de goals_completed_by_week_day completions
 // para extrair os objetos dentro da string que representa um array de objetos json
 JsonNode jsonNode = objectMapper.readTree(weekSummary.getCompletions());
-
 // converte um String que representa um objeto json para uma classe java
 Completion completionConvertedFromJson = objectMapper.readValue(json, Completion.class);
+
+// agora para { \"2024-09-13\" : [{\"id\" : 1, \"title\" : \"Me Exercitar\", \"completedAt\" : \"2024-09-13T17:44:13.826375-03:00\"}
+Map<String, List<Completion>> data = objectMapper.readValue(
+        jsonString,
+        new TypeReference<>() {
+        }
 ````

@@ -100,7 +100,12 @@ public interface GoalsRepository extends JpaRepository<Goals, UUID> {
                             ) AS completions
                         FROM goals_completed_in_week
                         GROUP BY goals_completed_in_week.completedAtDate
-                    ) SELECT *
+                    ) SELECT
+                       (SELECT COUNT(*) FROM goals_completed_in_week) AS completed,
+                       (SELECT SUM(goals_created_up_to_week.desired_weekly_frequency) FROM goals_created_up_to_week) AS total,
+                       JSON_OBJECT_AGG(
+                            goals_completed_by_week_day.completedAtDate, goals_completed_by_week_day.completions
+                       ) AS goalsPerDay
                     FROM goals_completed_by_week_day
                     """,
             nativeQuery = true

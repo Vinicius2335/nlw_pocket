@@ -1,7 +1,7 @@
 package com.github.vinicius2335.back.modules.goals.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -10,20 +10,29 @@ import com.github.vinicius2335.back.modules.goals.dto.response.Completion;
 import com.github.vinicius2335.back.modules.goals.dto.response.WeekSummary;
 import com.github.vinicius2335.back.modules.goals.dto.response.WeekSummaryResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static java.time.temporal.TemporalAdjusters.nextOrSame;
 import static java.time.temporal.TemporalAdjusters.previousOrSame;
 
 @RequiredArgsConstructor
 @Service
+@Log4j2
 public class GetWeekSummaryService {
     private final GoalsRepository goalsRepository;
 
+    /**
+     * retorna uma lista onde cada objeto representa um resumo com o total de metas,
+     * quantas foram completadas e quais foram finalizadas.
+     * @return lista um resumo do progresso do usuário durante a semana
+     */
     public Map<String, Object> execute() {
         LocalDate now = LocalDate.now();
 
@@ -36,41 +45,36 @@ public class GetWeekSummaryService {
         );
         Map<String, Object> response = new HashMap<>();
 
+        // Para cada resumo de um dia da semana que foi adicionado metas
         List<WeekSummaryResponse> summary = weekSummaries.stream()
                 .map(weekSummary -> {
                     ObjectMapper objectMapper = JsonMapper.builder()
                             .addModule(new JavaTimeModule())
                             .build();
 
-                    List<String> jsons = new ArrayList<>();
-                    List<Completion> completions = new ArrayList<>();
+                    Map<String, List<Completion>> getGoalsPerDay = new HashMap<>();
+                    String jsonString = weekSummary.getGoalsPerDay();
 
                     try {
-                        JsonNode jsonNode = objectMapper.readTree(weekSummary.getCompletions());
-                        if (jsonNode.isArray()) {
-                            for (int i = 0; i < jsonNode.size(); i++) {
-                                jsons.add(jsonNode.get(i).toString());
-                            }
-                        }
-
-                        jsons.forEach(
-                                json -> {
-                                    try {
-                                        Completion completionConvertedFromJson = objectMapper.readValue(json, Completion.class);
-                                        completions.add(completionConvertedFromJson);
-                                    } catch (JsonProcessingException e) {
-                                        // TODO - criar uma Exception
-                                        e.printStackTrace();
-                                    }
+                        // transforma a coluna que retorna um json em formato de string para um objeto
+                        Map<String, List<Completion>> data = objectMapper.readValue(
+                                jsonString,
+                                new TypeReference<>() {
                                 }
                         );
 
+                        getGoalsPerDay.putAll(data);
+
                     } catch (JsonProcessingException e) {
-                        // TODO - Criar uma Exception
-                        e.printStackTrace();
+                        log.error("Error when trying to transform a string that represents json into Object Java: {}", e.getMessage());
                     }
 
-                    return new WeekSummaryResponse(weekSummary.getCompletedAtDate(), completions);
+                    // retorna um resumo com o total de metas, quantas foram completadas e quais foram finalizadas
+                    return new WeekSummaryResponse(
+                            weekSummary.getCompleted(),
+                            weekSummary.getTotal(),
+                            getGoalsPerDay
+                    );
                 }).toList();
 
         response.put("summary", summary);

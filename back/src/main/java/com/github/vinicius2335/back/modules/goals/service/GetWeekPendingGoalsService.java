@@ -20,6 +20,11 @@ public class GetWeekPendingGoalsService {
 
     // novas metas não devem influenciar nas metas passadas
     // contar as metas realizadas durante a semana e verificar se foi completada ou não
+
+    /**
+     * Busca todas as metas até a semana atual. Conta as metas realizadas durante a semana e verificar se foi completada ou não
+     * @return lista de metas resumidas
+     */
     public GoalsSummaryListResponse execute(){
         LocalDate now = LocalDate.now();
 

@@ -12,6 +12,11 @@ import org.springframework.stereotype.Service;
 public class CreateGoalService {
     private final GoalsRepository goalsRepository;
 
+    /**
+     * Cria uma nova meta
+     * @param request representa a meta a ser criado
+     * @return retorna a meta criada
+     */
     @Transactional
     public Goals execute(CreateGoalRequest request){
         Goals goalsToSave = new Goals(request);
