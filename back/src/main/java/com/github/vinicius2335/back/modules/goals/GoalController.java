@@ -44,7 +44,7 @@ public class GoalController {
      *
      * @return uma lista de metas resumida da semana
      */
-    @GetMapping("/pending-goals")
+    @GetMapping("/pending")
     public ResponseEntity<GoalsSummaryListResponse> pendingGoalsHandler() {
         return ResponseEntity.ok(getWeekPendingGoalsService.execute());
     }

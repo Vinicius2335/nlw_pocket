@@ -4,8 +4,42 @@ import { DialogClose, DialogContent, DialogDescription, DialogTitle } from "./ui
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { RadioGroup, RadioGroupIndicator, RadioGroupItem } from "./ui/radio-group"
+import { Controller, useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { createGoalFormSchema, type CreateGoalForm } from "../form-schemas/create-goal-form-schema"
+import { daysOfWeek } from "../data/days-of-week"
+import { createGoal } from "../http/create-goal"
+import { useQueryClient } from "@tanstack/react-query"
 
 export function CreateGoal() {
+  const queryClient = useQueryClient()
+
+  // control > controla todas as funçoes do formulario estao aki
+  // precisamos por causa do raioButon do radix
+  // register > registrar os campos nativos do form
+  // handleSubmit > para adicionar a função que ira submeter o formulario
+  // formStage > para mostrar as mensagens de erro
+  // reset > resetar o formulario
+  const { register, control, handleSubmit, formState, reset } = useForm<CreateGoalForm>({
+    resolver: zodResolver(createGoalFormSchema)
+  })
+
+  async function handleCreateGoal(data: CreateGoalForm) {
+    await createGoal({
+      title: data.title,
+      desiredWeeklyFrequency: data.desiredWeeklyFrequency
+    })
+
+    queryClient.invalidateQueries({
+      queryKey: ["summary"]
+    })
+    queryClient.invalidateQueries({
+      queryKey: ["pending-goals"]
+    })
+
+    reset()
+  }
+
   return (
     <DialogContent>
       <div className="flex flex-col gap-6 h-full">
@@ -27,6 +61,7 @@ export function CreateGoal() {
         <form
           action=""
           className="flex flex-col justify-between flex-1"
+          onSubmit={handleSubmit(handleCreateGoal)}
         >
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
@@ -35,36 +70,44 @@ export function CreateGoal() {
                 placeholder="Praticar exercicios, meditar, etc..."
                 autoFocus
                 id="title"
+                {...register("title")}
               />
+
+              {formState.errors.title && (
+                <p className="text-red-400 text-sm">{formState.errors.title.message}</p>
+              )}
             </div>
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="">Quantas vezes na semana?</Label>
-              <RadioGroup>
-                <RadioGroupItem value="1">
-                  <RadioGroupIndicator />
-                  <span className="text-zinc-300 text-sm font-medium leading-none">
-                    1x na semana
-                  </span>
-                  <span className="text-lg leading-none">🥱</span>
-                </RadioGroupItem>
-
-                <RadioGroupItem value="2">
-                  <RadioGroupIndicator />
-                  <span className="text-zinc-300 text-sm font-medium leading-none">
-                    2x na semana
-                  </span>
-                  <span className="text-lg leading-none">🙂</span>
-                </RadioGroupItem>
-
-                <RadioGroupItem value="3">
-                  <RadioGroupIndicator />
-                  <span className="text-zinc-300 text-sm font-medium leading-none">
-                    3x na semana
-                  </span>
-                  <span className="text-lg leading-none">😎</span>
-                </RadioGroupItem>
-              </RadioGroup>
+              <Controller
+                control={control}
+                name="desiredWeeklyFrequency"
+                defaultValue={3}
+                render={({ field }) => {
+                  return (
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={String(field.value)}
+                    >
+                      {daysOfWeek.map(day => {
+                        return (
+                          <RadioGroupItem
+                            value={day.value}
+                            key={day.value}
+                          >
+                            <RadioGroupIndicator />
+                            <span className="text-zinc-300 text-sm font-medium leading-none">
+                              {day.title}
+                            </span>
+                            <span className="text-lg leading-none">{day.emotion}</span>
+                          </RadioGroupItem>
+                        )
+                      })}
+                    </RadioGroup>
+                  )
+                }}
+              />
             </div>
           </div>
 

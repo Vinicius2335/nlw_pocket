@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,13 +47,13 @@ public class GetWeekSummaryService {
         Map<String, Object> response = new HashMap<>();
 
         // Para cada resumo de um dia da semana que foi adicionado metas
-        List<WeekSummaryResponse> summary = weekSummaries.stream()
+        WeekSummaryResponse summary = weekSummaries.stream()
                 .map(weekSummary -> {
                     ObjectMapper objectMapper = JsonMapper.builder()
                             .addModule(new JavaTimeModule())
                             .build();
 
-                    Map<String, List<Completion>> getGoalsPerDay = new HashMap<>();
+                    LinkedHashMap<String, List<Completion>> getGoalsPerDay = new LinkedHashMap<>();
                     String jsonString = weekSummary.getGoalsPerDay();
 
                     try {
@@ -75,7 +76,7 @@ public class GetWeekSummaryService {
                             weekSummary.getTotal(),
                             getGoalsPerDay
                     );
-                }).toList();
+                }).findFirst().orElse(null);
 
         response.put("summary", summary);
         return response;

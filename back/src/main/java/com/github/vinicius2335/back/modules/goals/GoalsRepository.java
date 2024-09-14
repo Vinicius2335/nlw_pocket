@@ -88,6 +88,7 @@ public interface GoalsRepository extends JpaRepository<Goals, UUID> {
                             EXTRACT(DAY FROM gc.created_at) >= :firstDayOfWeek AND
                             EXTRACT(DAY FROM gc.created_at) <= :lastDayOfWeek
                          )
+                         ORDER BY gc.created_at DESC
                     ), goals_completed_by_week_day AS (
                         SELECT
                             goals_completed_in_week.completedAtDate AS completedAtDate,
@@ -100,6 +101,7 @@ public interface GoalsRepository extends JpaRepository<Goals, UUID> {
                             ) AS completions
                         FROM goals_completed_in_week
                         GROUP BY goals_completed_in_week.completedAtDate
+                        ORDER BY goals_completed_in_week.completedAtDate DESC
                     ) SELECT
                        (SELECT COUNT(*) FROM goals_completed_in_week) AS completed,
                        (SELECT SUM(goals_created_up_to_week.desired_weekly_frequency) FROM goals_created_up_to_week) AS total,
