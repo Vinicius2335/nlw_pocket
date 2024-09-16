@@ -1,5 +1,7 @@
-package com.github.vinicius2335.back.modules.goals;
+package com.github.vinicius2335.back.api.controllers;
 
+import com.github.vinicius2335.back.modules.goals.GoalNotFoundException;
+import com.github.vinicius2335.back.modules.goals.Goals;
 import com.github.vinicius2335.back.modules.goals.completions.CreateGoalCompletionService;
 import com.github.vinicius2335.back.modules.goals.completions.GoalAlreadyCompletedException;
 import com.github.vinicius2335.back.modules.goals.completions.dto.request.CreateGoalCompletionRequest;
