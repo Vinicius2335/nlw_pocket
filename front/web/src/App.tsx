@@ -4,6 +4,7 @@ import { EmptyGoals } from "./components/empty-goals"
 import { Summary } from "./components/summary"
 import { Dialog } from "./components/ui/dialog"
 import { getSummary } from "./http/get-summary"
+import { Toaster } from "sonner"
 
 export function App() {
   const { data } = useQuery({
@@ -15,10 +16,17 @@ export function App() {
   })
 
   return (
-    <Dialog>
-      {data?.total && data.total > 0 ? <Summary /> : <EmptyGoals />}
+    <>
+      <Toaster
+        theme="dark"
+        position="top-center"
+        richColors
+      />
 
-      <CreateGoal />
-    </Dialog>
+      <Dialog>
+        {data?.total && data.total > 0 ? <Summary /> : <EmptyGoals />}
+        <CreateGoal />
+      </Dialog>
+    </>
   )
 }

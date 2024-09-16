@@ -10,6 +10,7 @@ import { createGoalFormSchema, type CreateGoalForm } from "../form-schemas/creat
 import { daysOfWeek } from "../data/days-of-week"
 import { createGoal } from "../http/create-goal"
 import { useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 
 export function CreateGoal() {
   const queryClient = useQueryClient()
@@ -25,17 +26,21 @@ export function CreateGoal() {
   })
 
   async function handleCreateGoal(data: CreateGoalForm) {
-    await createGoal({
-      title: data.title,
-      desiredWeeklyFrequency: data.desiredWeeklyFrequency
-    })
+    try {
+      await createGoal({
+        title: data.title,
+        desiredWeeklyFrequency: data.desiredWeeklyFrequency
+      })
 
-    queryClient.invalidateQueries({
-      queryKey: ["summary"]
-    })
-    queryClient.invalidateQueries({
-      queryKey: ["pending-goals"]
-    })
+      queryClient.invalidateQueries({
+        queryKey: ["summary"]
+      })
+      queryClient.invalidateQueries({
+        queryKey: ["pending-goals"]
+      })
+    } catch (error) {
+      toast.error("Não foi possível salvar a meta, tente novamente mais tarde!")
+    }
 
     reset()
   }

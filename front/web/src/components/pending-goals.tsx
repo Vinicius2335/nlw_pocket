@@ -1,12 +1,12 @@
 import { Plus } from "lucide-react"
 import { OutlineButton } from "./ui/outline-button"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { getPendingGoals } from "../http/get-pending-goals"
 import { createGoalCompletion } from "../http/create-goal-completion"
+import { toast } from "sonner"
+import { queryClient } from "../libs/query-client"
 
 export function PendingGoals() {
-  const queryClient = useQueryClient()
-
   const { data } = useQuery({
     queryKey: ["pending-goals"],
     queryFn: getPendingGoals
@@ -17,15 +17,19 @@ export function PendingGoals() {
   }
 
   async function handleCompletedGoal(goalId: string) {
-    await createGoalCompletion(goalId)
+    try {
+      await createGoalCompletion(goalId)
 
-    // refaz o carregamento das querrys relacionados a queryKey
-    queryClient.invalidateQueries({
-      queryKey: ["summary"]
-    })
-    queryClient.invalidateQueries({
-      queryKey: ["pending-goals"]
-    })
+      // refaz o carregamento das querrys relacionados a queryKey
+      queryClient.invalidateQueries({
+        queryKey: ["summary"]
+      })
+      queryClient.invalidateQueries({
+        queryKey: ["pending-goals"]
+      })
+    } catch (error) {
+      toast.error("Não foi possível completar a meta, tente novamente mais tarde!")
+    }
   }
 
   return (
